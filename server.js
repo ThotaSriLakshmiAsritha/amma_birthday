@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css',
@@ -29,8 +29,20 @@ const server = http.createServer((req, res) => {
   
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) {
-      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-      res.end('404 Not Found');
+      // Fallback: if not found, serve index.html (SPA fallback)
+      const indexPath = path.join(__dirname, 'index.html');
+      fs.stat(indexPath, (iErr, iStats) => {
+        if (!iErr && iStats.isFile()) {
+          res.writeHead(200, {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'no-cache'
+          });
+          fs.createReadStream(indexPath).pipe(res);
+        } else {
+          res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+          res.end('404 Not Found');
+        }
+      });
       return;
     }
     
@@ -39,15 +51,17 @@ const server = http.createServer((req, res) => {
     
     res.writeHead(200, {
       'Content-Type': contentType,
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Accept-Ranges': 'bytes'
     });
     fs.createReadStream(filePath).pipe(res);
   });
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}/`);
+  });
+}
 
+module.exports = server;

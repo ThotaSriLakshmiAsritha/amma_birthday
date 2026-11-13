@@ -1,13 +1,7 @@
 {
-  "cleanUrls": true,
-  "headers": [
-    {
-      "source": "/audio/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
-        { "key": "Accept-Ranges", "value": "bytes" }
-      ]
+  "functions": {
+    "server.js": {
+      "includeFiles": "audio/**"
     }
-  ]
+  }
 }
-
