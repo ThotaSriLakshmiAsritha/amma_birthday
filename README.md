@@ -16,3 +16,4 @@ An interactive birthday celebration website created with love for Amma.
 node server.js
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+

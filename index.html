@@ -716,6 +716,17 @@
     <canvas id="cf"></canvas>
     <button id="mute" aria-label="Turn music off">🎵</button>
 
+    <!-- Audio elements preloaded for instant playback across all devices -->
+    <audio id="bgm" src="audio/bgm.mp3" loop preload="auto"></audio>
+    <audio id="audio-asritha" preload="auto">
+        <source src="audio/asritha.wav" type="audio/wav">
+        <source src="audio/asritha.ogg" type="audio/ogg">
+    </audio>
+    <audio id="audio-rigved" preload="auto">
+        <source src="audio/rigved.wav" type="audio/wav">
+        <source src="audio/rigved.ogg" type="audio/ogg">
+    </audio>
+
     <div id="intro" class="wine">
         <h1>A little surprise<br>for Sowjanya</h1>
         <div class="env">
@@ -806,55 +817,33 @@
             if (P.length) requestAnimationFrame(frame); else { run = false; cx.clearRect(0, 0, cv.width, cv.height) }
         }
 
-        /* birthday song, synthesised */
-        let ac, master, muted = false, timer;
-        const SONG = [[7, .75], [7, .25], [9, 1], [7, 1], [12, 1], [11, 2], [7, .75], [7, .25], [9, 1], [7, 1], [14, 1], [12, 2], [7, .75], [7, .25], [19, 1], [16, 1], [12, 1], [11, 1], [9, 1], [17, .75], [17, .25], [16, 1], [12, 1], [14, 1], [12, 2]];
-        function loop() {
-            const B = .5; let t = ac.currentTime + .1;
-            SONG.forEach(([n, d]) => {
-                const f = 261.63 * Math.pow(2, n / 12);
-                [[f, 'triangle', .9], [f * 2, 'sine', .25], [f / 2, 'sine', .2]].forEach(([fr, ty, v]) => {
-                    const o = ac.createOscillator(), g = ac.createGain(); o.type = ty; o.frequency.value = fr;
-                    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .02); g.gain.exponentialRampToValueAtTime(.001, t + d * B * .95);
-                    o.connect(g); g.connect(master); o.start(t); o.stop(t + d * B)
-                }); t += d * B
-            });
-            timer = setTimeout(loop, (t - ac.currentTime + 1.5) * 1000)
+        /* background music (mp3) with mute & volume control */
+        let muted = false;
+        function getBgm() {
+            return document.getElementById('bgm');
         }
-        let bgmAudio = null;
         function startSong() {
-            try {
-                const exts = ['.mp3', '.m4a', '.ogg', '.wav'];
-                let idx = 0;
-                function tryBgm() {
-                    if (idx >= exts.length) {
-                        if (!ac) {
-                            ac = new (window.AudioContext || window.webkitAudioContext)();
-                            master = ac.createGain(); master.gain.value = .16;
-                            master.connect(ac.destination);
-                        }
-                        ac.resume(); clearTimeout(timer); loop();
-                        return;
-                    }
-                    const a = new Audio('audio/bgm' + exts[idx++]);
-                    a.loop = true;
-                    a.volume = muted ? 0 : 0.4;
-                    a.play().then(() => {
-                        bgmAudio = a;
-                    }).catch(() => {
-                        tryBgm();
-                    });
-                }
-                tryBgm();
-            } catch (e) { }
+            const b = getBgm();
+            if (!b) return;
+            b.volume = muted ? 0 : 0.45;
+            const p = b.play();
+            if (p && p.catch) {
+                p.catch(err => {
+                    console.log('BGM playback waiting for user action:', err);
+                });
+            }
         }
         function vol(v) {
-            if (bgmAudio) bgmAudio.volume = muted ? 0 : Math.min(1, v * 2.5);
-            if (master) master.gain.value = muted ? 0 : v;
+            const b = getBgm();
+            if (b) b.volume = muted ? 0 : v;
         }
         $('#mute').onclick = () => {
             muted = !muted;
-            vol(muted ? 0 : (bgmAudio ? 0.4 : .16));
+            const b = getBgm();
+            if (b) {
+                b.volume = muted ? 0 : 0.45;
+                if (!muted && b.paused) b.play().catch(() => {});
+            }
             $('#mute').textContent = muted ? '🔇' : '🎵';
             $('#mute').setAttribute('aria-label', muted ? 'Turn music on' : 'Turn music off');
         };
@@ -909,32 +898,54 @@
         function playVoiceNote(who, btn) {
             if (activeVoiceAudio) {
                 activeVoiceAudio.pause();
+                activeVoiceAudio.currentTime = 0;
                 activeVoiceAudio = null;
                 document.querySelectorAll('.ch').forEach(el => el.classList.remove('speaking'));
             }
+            // Duck background music completely while speaking so Amma can hear them clearly
             vol(0);
-            const extensions = ['.mp3', '.m4a', '.wav', '.ogg', '.aac'];
-            let idx = 0;
-            function tryNext() {
-                if (idx >= extensions.length) {
-                    vol(.16);
-                    btn.classList.remove('speaking');
-                    return;
-                }
-                const a = new Audio('audio/' + who + extensions[idx++]);
-                a.play().then(() => {
-                    activeVoiceAudio = a;
-                    btn.classList.add('speaking');
-                    a.onended = () => {
-                        vol(.16);
-                        activeVoiceAudio = null;
-                        btn.classList.remove('speaking');
-                    };
-                }).catch(() => {
-                    tryNext();
+
+            let a = document.getElementById('audio-' + who);
+            if (!a) {
+                a = new Audio('audio/' + who + '.wav');
+            }
+            a.currentTime = 0;
+            btn.classList.add('speaking');
+            activeVoiceAudio = a;
+
+            const onFinish = () => {
+                btn.classList.remove('speaking');
+                if (activeVoiceAudio === a) activeVoiceAudio = null;
+                vol(0.45);
+            };
+
+            a.onended = onFinish;
+            a.onerror = () => {
+                console.warn('Audio tag error, falling back to new Audio wav');
+                const fb = new Audio('audio/' + who + '.wav');
+                fb.onended = onFinish;
+                fb.play().then(() => {
+                    activeVoiceAudio = fb;
+                }).catch(e => {
+                    console.error('Fallback audio failed:', e);
+                    onFinish();
+                });
+            };
+
+            const p = a.play();
+            if (p && p.catch) {
+                p.catch(err => {
+                    console.warn('Audio play rejected, retrying with standalone Audio element:', err);
+                    const fb = new Audio('audio/' + who + '.wav');
+                    fb.onended = onFinish;
+                    fb.play().then(() => {
+                        activeVoiceAudio = fb;
+                    }).catch(e => {
+                        console.error('Retry failed:', e);
+                        onFinish();
+                    });
                 });
             }
-            tryNext();
         }
 
         SIBLINGS.forEach((sib, k) => {
@@ -993,7 +1004,7 @@
             (function tick(t) { requestAnimationFrame(tick); if (!vis) return; if (drag === null) cake.rotation.y += .004; FL.forEach((x, i) => { if (x.on) x.f.scale.set(1 + Math.sin(t / 90 + i) * .12, 1 + Math.sin(t / 70 + i * 2) * .2, 1) }); R.render(S, C) })(0);
             const lit = () => FL.filter(x => x.on).length;
             function snuff(x) { if (!x.on) return; x.on = false; x.f.visible = false; if (!lit()) done() }
-            function done() { $('#wish').textContent = 'Make a wish, Sowjanya! 🌟'; const r = cvs.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height * .3, 140); rain(); vol(.16) }
+            function done() { $('#wish').textContent = 'Make a wish, Sowjanya! 🌟'; const r = cvs.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height * .3, 140); rain(); vol(.45) }
             $('#relight').onclick = () => { FL.forEach(x => { x.on = true; x.f.visible = true }); $('#wish').textContent = '' };
             let listening = false;
             $('#blow').onclick = async () => {
