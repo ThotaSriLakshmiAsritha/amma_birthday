@@ -621,18 +621,24 @@
 
         #mute {
             position: fixed;
-            top: calc(env(safe-area-inset-top, 0px) + 12px);
-            right: 12px;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+            right: 16px;
             z-index: 95;
-            width: 46px;
-            height: 46px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
-            border: 0;
+            border: 2px solid var(--deep);
             background: var(--gold);
             color: var(--deep);
             font-size: 22px;
             cursor: pointer;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, .35)
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
+            display: grid;
+            place-items: center;
+            transition: transform .2s, background .2s;
+        }
+        #mute:active {
+            transform: scale(0.92);
         }
 
         #cf {
@@ -1048,25 +1054,15 @@
 
 <body>
     <canvas id="cf"></canvas>
-    <button id="mute" aria-label="Turn music off">
+    <button id="mute" aria-label="Turn music off">🎵</button>
+    <button id="floatingSurpriseBtn" aria-label="Open Birthday Surprise Video">
+        <span>🎁</span> <span>Surprise Video</span>
+    </button>
 
     <!-- Background music: streams cleanly via HTTP Range requests -->
     <audio id="bgm" src="audio/bgm.mp3" loop preload="auto" playsinline webkit-playsinline></audio>
     <audio id="audio-asritha" src="audio/asritha.wav" preload="auto" playsinline webkit-playsinline></audio>
     <audio id="audio-rigved" src="audio/rigved.wav" preload="auto" playsinline webkit-playsinline></audio>
-
-    <div id="intro" class="wine">
-        <h1>A little surprise<br>for Sowjanya</h1>
-        <div class="env">
-            <div class="eb"></div>
-            <div class="ef"></div>
-            <div class="fl"></div><button class="seal" id="seal" aria-label="Open the envelope">S</button>
-    <button id="floatingSurpriseBtn" aria-label="Open Birthday Surprise Video">
-        <span>🎁</span> <span>Surprise Video</span>
-    </button>
-        </div>
-        <p class="hand" style="margin:0;font-size:26px;color:var(--paper)">Turn your sound on and tap the seal</p>
-    </div>
 
     <section id="hero" class="wine">
         <div class="in">
@@ -1247,12 +1243,9 @@
             if (activeVoiceAudio) return; // Never unmute or restart BGM while kids are speaking!
             const b = getBgm();
             if (b && b.paused && !muted) {
-                const i = $('#intro');
-                if (i && (i.classList.contains('op') || i.classList.contains('gone'))) {
-                    b.muted = false;
-                    b.volume = 0.45;
-                    b.play().catch(() => {});
-                }
+                b.muted = false;
+                b.volume = 0.45;
+                b.play().catch(() => {});
             }
         }
 
@@ -1292,23 +1285,11 @@
             $('#mute').setAttribute('aria-label', muted ? 'Turn music on' : 'Turn music off');
         };
 
-        /* envelope intro */
-        const seal = $('#seal');
-        const openEnvelope = () => {
-            const i = $('#intro');
-            if (i.classList.contains('op')) return;
-            i.classList.add('op');
-            startSong();
-            setTimeout(() => {
-                document.body.classList.add('go');
-                i.classList.add('gone');
-                burst(innerWidth / 2, innerHeight * .4, 150);
-            }, 1100);
-        };
-        seal.addEventListener('pointerdown', () => {
-            startSong();
-        }, { passive: true });
-        seal.addEventListener('click', openEnvelope);
+        /* Direct celebration start */
+        document.body.classList.add('go');
+        setTimeout(() => {
+            burst(innerWidth / 2, innerHeight * 0.35, 140);
+        }, 500);
 
         /* memory wall */
         const wall = $('#wall'), lb = $('#lb');
