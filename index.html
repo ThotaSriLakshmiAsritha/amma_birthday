@@ -709,7 +709,341 @@
                 animation: none
             }
         }
-    </style>
+    
+        /* --- Floating Sparkles & Hearts on Tap/Drag --- */
+        .floating-sparkle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            user-select: none;
+            will-change: transform, opacity;
+            animation: floatUpFade 1.6s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+        }
+        @keyframes floatUpFade {
+            0% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(0.6) rotate(0deg);
+            }
+            50% {
+                opacity: 0.9;
+                transform: translate3d(var(--drift, 0px), -60px, 0) scale(1.15) rotate(15deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate3d(calc(var(--drift, 0px) * 1.5), -130px, 0) scale(0.9) rotate(-10deg);
+            }
+        }
+
+        /* --- Surprise Video Section & Floating Button --- */
+        #surpriseSec {
+            padding: 50px 16px;
+            text-align: center;
+        }
+        .surprise-card {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 36px 24px;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 16px 40px rgba(74, 10, 19, 0.08), 0 0 0 1.5px rgba(231, 191, 106, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .surprise-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--gold), var(--rose), var(--gold));
+        }
+        .surprise-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(231, 191, 106, 0.2);
+            color: var(--wine);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .surprise-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--wine) 0%, var(--deep) 100%);
+            color: var(--paper);
+            border: 2px solid var(--gold);
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(107, 15, 26, 0.3), 0 0 15px rgba(231, 191, 106, 0.35);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+            animation: pulseSurprise 2.5s infinite ease-in-out;
+        }
+        @keyframes pulseSurprise {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 24px rgba(107, 15, 26, 0.3), 0 0 15px rgba(231, 191, 106, 0.35); }
+            50% { transform: scale(1.03); box-shadow: 0 14px 30px rgba(107, 15, 26, 0.4), 0 0 25px rgba(231, 191, 106, 0.6); }
+        }
+        .surprise-btn:active {
+            transform: scale(0.97);
+        }
+        .s-badge {
+            background: var(--gold);
+            color: var(--deep);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        #floatingSurpriseBtn {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+            left: 16px;
+            z-index: 95;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--wine) 0%, var(--deep) 100%);
+            color: var(--paper);
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 2px solid var(--gold);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s ease;
+            animation: floatPill 3s ease-in-out infinite;
+        }
+        @keyframes floatPill {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        #floatingSurpriseBtn:active {
+            transform: scale(0.95);
+        }
+
+        /* --- Video Modal & Theater Styles --- */
+        .v-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .v-modal.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .v-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(18, 2, 5, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .v-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            z-index: 2;
+            transform: scale(0.92) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .v-modal.open .v-container {
+            transform: scale(1) translateY(0);
+        }
+        .v-card {
+            background: #1f0509;
+            border: 2px solid var(--gold);
+            border-radius: 24px;
+            padding: 20px;
+            color: var(--paper);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.65), 0 0 35px rgba(231,191,106,0.3);
+            position: relative;
+        }
+        .v-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, transform 0.2s ease;
+            z-index: 10;
+        }
+        .v-close:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.08);
+        }
+        .v-top {
+            padding-right: 44px;
+            margin-bottom: 14px;
+        }
+        .v-tag {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: var(--gold);
+            background: rgba(231,191,106,0.18);
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-bottom: 4px;
+        }
+        .v-title {
+            margin: 4px 0 0 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .v-player-box {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .v-player-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            background: #000;
+        }
+        .v-toast {
+            position: absolute;
+            inset: 0;
+            background: rgba(28, 4, 8, 0.94);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            z-index: 5;
+            animation: fadeInToast 0.3s ease;
+        }
+        @keyframes fadeInToast {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .v-toast-content {
+            max-width: 380px;
+        }
+        .v-toast-icon {
+            font-size: 42px;
+            display: block;
+            margin-bottom: 8px;
+            animation: bounceIcon 0.8s infinite alternate ease-in-out;
+        }
+        @keyframes bounceIcon {
+            from { transform: translateY(0); }
+            to { transform: translateY(-8px); }
+        }
+        .v-toast h4 {
+            margin: 0 0 6px 0;
+            font-size: 20px;
+            color: var(--gold);
+        }
+        .v-toast p {
+            margin: 0 0 16px 0;
+            font-size: 15px;
+            color: var(--paper);
+            opacity: 0.9;
+        }
+        .v-toast-btn {
+            background: linear-gradient(135deg, var(--gold) 0%, #d4a849 100%);
+            color: var(--deep);
+            border: none;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            font-family: inherit;
+        }
+        .v-toast-btn:active {
+            transform: scale(0.96);
+        }
+        .v-btn-sec {
+            background: rgba(255,255,255,0.18);
+            color: #fff;
+        }
+        .v-toast-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .v-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 14px;
+        }
+        .v-nav-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--paper);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-family: inherit;
+        }
+        .v-nav-btn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.2);
+        }
+        .v-nav-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .v-stepper {
+            display: flex;
+            gap: 8px;
+        }
+        .v-step {
+            width: 28px;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.2);
+            transition: background 0.3s ease, width 0.3s ease;
+        }
+        .v-step.active {
+            background: var(--gold);
+            width: 40px;
+        }
+</style>
 </head>
 
 <body>
@@ -733,6 +1067,9 @@
             <div class="eb"></div>
             <div class="ef"></div>
             <div class="fl"></div><button class="seal" id="seal" aria-label="Open the envelope">S</button>
+    <button id="floatingSurpriseBtn" aria-label="Open Birthday Surprise Video">
+        <span>🎁</span> <span>Surprise Video</span>
+    </button>
         </div>
         <p class="hand" style="margin:0;font-size:26px;color:var(--paper)">Turn your sound on and tap the seal</p>
     </div>
@@ -774,6 +1111,22 @@
         </div>
     </section>
 
+    <!-- Surprise Video Section -->
+    <section id="surpriseSec">
+        <div class="surprise-card">
+            <div class="surprise-badge">✨ Special Birthday Surprise ✨</div>
+            <h2 style="margin: 8px 0 12px 0;">A Video Message Just For You, Amma</h2>
+            <p class="sub" style="max-width: 540px; margin: 0 auto 24px auto;">
+                We have a special surprise waiting for you! Tap below to watch the special videos we prepared for your birthday.
+            </p>
+            <button class="surprise-btn" id="openSurpriseBtn" aria-label="Watch Birthday Surprise Videos">
+                <span class="s-icon">🎬</span>
+                <span class="s-text">Watch Birthday Surprise Videos</span>
+                <span class="s-badge">2 Videos</span>
+            </button>
+        </div>
+    </section>
+
     <section id="cakeSec" class="wine">
         <div class="in">
             <h2>Time to make a wish</h2>
@@ -784,7 +1137,58 @@
             <div id="wish" aria-live="polite"></div>
         </div>
     </section>
-    <footer class="hand" style="font-size:26px">Made with love by your family 💛</footer>
+    
+    <!-- Birthday Video Modal Player -->
+    <div id="videoModal" class="v-modal" aria-hidden="true" role="dialog" aria-labelledby="vTitle">
+        <div class="v-backdrop" id="vBackdrop"></div>
+        <div class="v-container">
+            <div class="v-card">
+                <button class="v-close" id="closeVideoBtn" aria-label="Close video">✕</button>
+                
+                <div class="v-top">
+                    <span class="v-tag" id="vTag">Video 1 of 2</span>
+                    <h3 id="vTitle" class="v-title">Special Birthday Surprise ✨</h3>
+                </div>
+
+                <div class="v-player-box">
+                    <video id="vPlayer" playsinline webkit-playsinline controls preload="metadata"></video>
+
+                    <!-- Next Video countdown/toast overlay -->
+                    <div id="vNextToast" class="v-toast" style="display: none;">
+                        <div class="v-toast-content">
+                            <span class="v-toast-icon">🎉</span>
+                            <h4>Part 1 complete!</h4>
+                            <p>Part 2 starting automatically...</p>
+                            <button id="vPlayNextNow" class="v-toast-btn">Play Part 2 Now ⏩</button>
+                        </div>
+                    </div>
+
+                    <!-- Finished celebration overlay -->
+                    <div id="vDoneToast" class="v-toast" style="display: none;">
+                        <div class="v-toast-content">
+                            <span class="v-toast-icon">❤️🎂🎉</span>
+                            <h4>We love you so much, Amma!</h4>
+                            <p>You mean the world to us — Asritha & Rigved</p>
+                            <div class="v-toast-actions">
+                                <button id="vReplayAll" class="v-toast-btn">Watch Again 🔁</button>
+                                <button id="vCloseDone" class="v-toast-btn v-btn-sec">Back to Birthday Cake 🎂</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="v-nav">
+                    <button id="vPrev" class="v-nav-btn" disabled>⏮️ Video 1</button>
+                    <div class="v-stepper">
+                        <span class="v-step active" id="vStep1"></span>
+                        <span class="v-step" id="vStep2"></span>
+                    </div>
+                    <button id="vNext" class="v-nav-btn">Video 2 ⏭️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<footer class="hand" style="font-size:26px">Made with love by your family 💛</footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
@@ -1081,7 +1485,179 @@
                 } catch (e) { FL.forEach((x, i) => setTimeout(() => snuff(x), i * 200)) }
             };
         })();
-    </script>
+    
+        /* --- Surprise Video Theater & Sparkle Trail Logic --- */
+        (function initSurpriseVideos() {
+            const VIDEOS = [
+                {
+                    src: 'video/surprise1.mp4',
+                    title: 'A Special Wish for Amma ✨',
+                    tag: 'Video 1 of 2'
+                },
+                {
+                    src: 'video/surprise2.mp4',
+                    title: 'Happy Birthday, Mom! 🎂',
+                    tag: 'Video 2 of 2'
+                }
+            ];
+
+            let curIdx = 0;
+            let nextTimer = null;
+            let bgmWasPlaying = false;
+
+            const modal = $('#videoModal');
+            const vPlayer = $('#vPlayer');
+            const vTitle = $('#vTitle');
+            const vTag = $('#vTag');
+            const vPrev = $('#vPrev');
+            const vNext = $('#vNext');
+            const vStep1 = $('#vStep1');
+            const vStep2 = $('#vStep2');
+            const vNextToast = $('#vNextToast');
+            const vDoneToast = $('#vDoneToast');
+
+            function updateUI() {
+                vTitle.textContent = VIDEOS[curIdx].title;
+                vTag.textContent = VIDEOS[curIdx].tag;
+                vPrev.disabled = (curIdx === 0);
+                vNext.disabled = (curIdx === VIDEOS.length - 1);
+                if (curIdx === 0) {
+                    vStep1.classList.add('active');
+                    vStep2.classList.remove('active');
+                } else {
+                    vStep1.classList.remove('active');
+                    vStep2.classList.add('active');
+                }
+            }
+
+            function loadAndPlay(idx) {
+                curIdx = idx;
+                if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
+                vNextToast.style.display = 'none';
+                vDoneToast.style.display = 'none';
+                updateUI();
+                vPlayer.src = VIDEOS[curIdx].src;
+                vPlayer.load();
+                vPlayer.play().catch(err => {
+                    console.log('Video play waiting for interaction:', err);
+                });
+            }
+
+            function openModal() {
+                const b = getBgm();
+                if (b && !b.paused) {
+                    bgmWasPlaying = true;
+                    b.pause();
+                } else {
+                    bgmWasPlaying = false;
+                }
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden', 'false');
+                loadAndPlay(0);
+                burst(innerWidth / 2, innerHeight * 0.45, 80);
+            }
+
+            function closeModal() {
+                if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; }
+                vPlayer.pause();
+                vNextToast.style.display = 'none';
+                vDoneToast.style.display = 'none';
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+                if (bgmWasPlaying && !muted) {
+                    const b = getBgm();
+                    if (b) {
+                        b.muted = false;
+                        b.volume = 0.45;
+                        b.play().catch(() => {});
+                    }
+                }
+            }
+
+            // Automatic next video on finish
+            vPlayer.addEventListener('ended', () => {
+                if (curIdx === 0) {
+                    // Show next video countdown toast
+                    vNextToast.style.display = 'flex';
+                    burst(innerWidth / 2, innerHeight * 0.45, 50);
+                    nextTimer = setTimeout(() => {
+                        loadAndPlay(1);
+                    }, 1400);
+                } else {
+                    // Finished all videos!
+                    vDoneToast.style.display = 'flex';
+                    burst(innerWidth / 2, innerHeight * 0.4, 140);
+                    rain();
+                }
+            });
+
+            $('#openSurpriseBtn').onclick = openModal;
+            const floatBtn = $('#floatingSurpriseBtn');
+            if (floatBtn) floatBtn.onclick = openModal;
+
+            $('#closeVideoBtn').onclick = closeModal;
+            $('#vBackdrop').onclick = closeModal;
+            $('#vCloseDone').onclick = closeModal;
+
+            $('#vPlayNextNow').onclick = () => {
+                loadAndPlay(1);
+            };
+
+            $('#vReplayAll').onclick = () => {
+                loadAndPlay(0);
+            };
+
+            vPrev.onclick = () => {
+                if (curIdx > 0) loadAndPlay(curIdx - 1);
+            };
+            vNext.onclick = () => {
+                if (curIdx < VIDEOS.length - 1) loadAndPlay(curIdx + 1);
+            };
+
+            // Keyboard Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('open')) {
+                    closeModal();
+                }
+            });
+        })();
+
+        /* --- Floating Love Sparkles & Hearts on Tap/Drag --- */
+        (function initSparkleHearts() {
+            const ICONS = ['💖', '✨', '🌸', '⭐', '💕', '🌷', '🎂', '🥰'];
+            let lastSpawn = 0;
+
+            function spawnSparkle(x, y) {
+                const el = document.createElement('span');
+                el.className = 'floating-sparkle';
+                el.textContent = ICONS[Math.floor(Math.random() * ICONS.length)];
+                const drift = (Math.random() - 0.5) * 60;
+                const size = 18 + Math.random() * 16;
+                const dur = 1.3 + Math.random() * 0.7;
+                el.style.left = (x - size / 2) + 'px';
+                el.style.top = (y - size / 2) + 'px';
+                el.style.fontSize = size + 'px';
+                el.style.setProperty('--drift', drift + 'px');
+                el.style.animationDuration = dur + 's';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), dur * 1000);
+            }
+
+            function handlePointer(e) {
+                const now = Date.now();
+                if (now - lastSpawn < 55) return;
+                lastSpawn = now;
+                const x = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+                const y = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+                if (x || y) spawnSparkle(x, y);
+            }
+
+            window.addEventListener('pointerdown', handlePointer, { passive: true });
+            window.addEventListener('pointermove', (e) => {
+                if (e.buttons > 0) handlePointer(e);
+            }, { passive: true });
+        })();
+</script>
 </body>
 
 </html>

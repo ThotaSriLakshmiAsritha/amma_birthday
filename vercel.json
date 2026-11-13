@@ -1,7 +1,7 @@
 {
   "functions": {
     "server.js": {
-      "includeFiles": "audio/**"
+      "includeFiles": "{audio/**,video/**}"
     }
   }
 }
